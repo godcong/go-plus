@@ -17,7 +17,7 @@ func TestMultiReader(t *testing.T) {
 	if e != nil {
 		return
 	}
-	reader := MultiReader(r1, r2, r3, file)
+	reader := MultiReader(r1, file, r2, r3)
 
 	newReader := bufio.NewReader(reader)
 	for {
