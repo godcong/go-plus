@@ -12,8 +12,8 @@ import (
 func TestMultiReader(t *testing.T) {
 	r1 := strings.NewReader("one\nthree\nfive\n")
 	r2 := strings.NewReader("two\n")
-	r3 := strings.NewReader("aaaaaaaaaaaaaaaa\ntwo\n")
-	file, e := os.Open("D:\\video\\name.txt")
+	r3 := strings.NewReader("eeeeeecdddaaaaaaaaaaaaaaaa\ntwwwwwo\n")
+	file, e := os.Open("D:\\video\\ssr201909182203.txt")
 	if e != nil {
 		return
 	}
