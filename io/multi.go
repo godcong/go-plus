@@ -62,7 +62,7 @@ func (m *multiReader) Read(p []byte) (n int, err error) {
 		} else {
 			if r.err == io.EOF {
 				m.count++
-				//continue
+				continue
 			}
 			n := copy(p, r.p[:r.n])
 			return n, nil
