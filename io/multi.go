@@ -24,13 +24,12 @@ type chanReader struct {
 }
 
 func (m *multiReader) Read(p []byte) (n int, err error) {
-	if len(m.readers) == 1 {
-		if r, ok := m.readers[0].(*multiReader); ok {
-			m.readers = r.readers
-		}
-	}
-
 	if m.chanReader == nil {
+		if len(m.readers) == 1 {
+			if r, ok := m.readers[0].(*multiReader); ok {
+				m.readers = r.readers
+			}
+		}
 		m.chanReader = make(chan *chanReader)
 		for i := 0; i < len(m.readers); i++ {
 			go func(cb chan<- *chanReader, index int, reader io.Reader) {
