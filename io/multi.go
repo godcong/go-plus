@@ -1,6 +1,9 @@
 package io
 
-import "io"
+import (
+	"fmt"
+	"io"
+)
 
 type multiReader struct {
 	readers []io.Reader
@@ -21,14 +24,13 @@ func (m *multiReader) Read(p []byte) (n int, err error) {
 	}
 
 	for i := 0; i < len(m.readers); i++ {
+		fmt.Println("reader", i)
 		go func(cb chan<- *chanReader, reader io.Reader) {
-			p1 := make([]byte, len(p))
-			n, err := reader.Read(p1)
-			cb <- &chanReader{
-				p:   p1,
-				n:   n,
-				err: err,
+			r := &chanReader{
+				p: make([]byte, len(p)),
 			}
+			r.n, r.err = reader.Read(r.p)
+			cb <- r
 		}(cr, m.readers[i])
 	}
 
@@ -36,12 +38,15 @@ func (m *multiReader) Read(p []byte) (n int, err error) {
 ReadEnd:
 	for {
 		select {
-		case reader := <-cr:
-			if reader.err != io.EOF {
-				return 0, reader.err
+		case r := <-cr:
+			if r.err != io.EOF {
+				return 0, r.err
 			} else {
 				ecount++
 			}
+			fmt.Println("copy1", string(r.p))
+
+			n = copy(p, r.p)
 			if ecount == len(m.readers) {
 				break ReadEnd
 			}
