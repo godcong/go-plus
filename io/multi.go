@@ -1,60 +1,74 @@
 package io
 
 import (
-	"fmt"
 	"io"
 )
 
+type eofReader struct{}
+
+func (eofReader) Read([]byte) (int, error) {
+	return 0, io.EOF
+}
+
 type multiReader struct {
-	readers []io.Reader
+	count      int
+	chanReader chan *chanReader
+	readers    []io.Reader
 }
 
 type chanReader struct {
-	p   []byte
-	n   int
-	err error
+	index int
+	p     []byte
+	n     int
+	err   error
 }
 
 func (m *multiReader) Read(p []byte) (n int, err error) {
-	cr := make(chan *chanReader)
 	if len(m.readers) == 1 {
 		if r, ok := m.readers[0].(*multiReader); ok {
 			m.readers = r.readers
 		}
 	}
 
-	for i := 0; i < len(m.readers); i++ {
-		fmt.Println("reader", i)
-		go func(cb chan<- *chanReader, reader io.Reader) {
-			r := &chanReader{
-				p: make([]byte, len(p)),
-			}
-			r.n, r.err = reader.Read(r.p)
-			cb <- r
-		}(cr, m.readers[i])
-	}
-
-	ecount := 0
-ReadEnd:
-	for {
-		select {
-		case r := <-cr:
-			if r.err != io.EOF {
-				return 0, r.err
-			} else {
-				ecount++
-			}
-			fmt.Println("copy1", string(r.p))
-
-			n = copy(p, r.p)
-			if ecount == len(m.readers) {
-				break ReadEnd
-			}
+	if m.chanReader == nil {
+		m.chanReader = make(chan *chanReader)
+		for i := 0; i < len(m.readers); i++ {
+			go func(cb chan<- *chanReader, index int, reader io.Reader) {
+				for {
+					r := &chanReader{
+						index: index,
+						p:     make([]byte, len(p)),
+					}
+					r.n, r.err = reader.Read(r.p)
+					cb <- r
+					if r.err != nil {
+						return
+					}
+				}
+			}(m.chanReader, i, m.readers[i])
 		}
 	}
 
+	for {
+		if m.count >= len(m.readers) {
+			close(m.chanReader)
+			m.chanReader = nil
+			break
+		}
+		r := <-m.chanReader
+		if r.err != nil && r.err != io.EOF {
+			close(m.chanReader)
+			m.chanReader = nil
+			return 0, r.err
+		} else {
+			if r.err == io.EOF {
+				m.count++
+			}
+			n := copy(p, r.p[:r.n])
+			return n, nil
+		}
+	}
 	return 0, io.EOF
-
 }
 
 // MultiReader returns a Reader that's the logical concatenation of
@@ -64,5 +78,5 @@ ReadEnd:
 func MultiReader(readers ...io.Reader) io.Reader {
 	r := make([]io.Reader, len(readers))
 	copy(r, readers)
-	return &multiReader{r}
+	return &multiReader{readers: r}
 }
