@@ -17,7 +17,8 @@ type chanReader struct {
 	err   error
 }
 
-//Decrypted: Read
+// Read ...
+// Deprecated:move to https://github.com/goextension/io
 func (m *multiReader) Read(p []byte) (n int, err error) {
 	if m.chanReader == nil {
 		if len(m.readers) == 1 {
