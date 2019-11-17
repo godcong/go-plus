@@ -1,8 +1,8 @@
-package io
+package io_test
 
 import (
 	"bufio"
-	"io"
+	"github.com/godcong/go-plus/io"
 	"log"
 	"os"
 	"strings"
@@ -17,7 +17,7 @@ func TestMultiReader(t *testing.T) {
 	if e != nil {
 		return
 	}
-	reader := MultiReader(r1, file, r2, r3)
+	reader := io.MultiReader(r1, file, r2, r3)
 	newReader := bufio.NewReader(reader)
 	for {
 		line, isPrefix, err := newReader.ReadLine()

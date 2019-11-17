@@ -16,6 +16,7 @@ type chanReader struct {
 	n     int
 	err   error
 }
+
 //Decrypted: Read
 func (m *multiReader) Read(p []byte) (n int, err error) {
 	if m.chanReader == nil {
@@ -65,10 +66,11 @@ func (m *multiReader) Read(p []byte) (n int, err error) {
 	return 0, io.EOF
 }
 
-// Decrypted: MultiReader  returns a Reader that's the logical concatenation of
+// MultiReader  returns a Reader that's the logical concatenation of
 // the provided input readers. They're read sequentially. Once all
 // inputs have returned EOF, Read will return EOF.  If any of the readers
 // return a non-nil, non-EOF error, Read will return that error.
+// Deprecated:move to https://github.com/goextension/io
 func MultiReader(readers ...io.Reader) io.Reader {
 	r := make([]io.Reader, len(readers))
 	copy(r, readers)
