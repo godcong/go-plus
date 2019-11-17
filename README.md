@@ -1,4 +1,4 @@
-# go-plus
+# Please use https://github.com/goextension/io
 
 #MultiReader
 MultiReader used like io.MultiReader.  
