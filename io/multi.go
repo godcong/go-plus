@@ -16,7 +16,7 @@ type chanReader struct {
 	n     int
 	err   error
 }
-
+//Read Decrypted
 func (m *multiReader) Read(p []byte) (n int, err error) {
 	if m.chanReader == nil {
 		if len(m.readers) == 1 {
@@ -65,7 +65,7 @@ func (m *multiReader) Read(p []byte) (n int, err error) {
 	return 0, io.EOF
 }
 
-// MultiReader returns a Reader that's the logical concatenation of
+// MultiReader Decrypted returns a Reader that's the logical concatenation of
 // the provided input readers. They're read sequentially. Once all
 // inputs have returned EOF, Read will return EOF.  If any of the readers
 // return a non-nil, non-EOF error, Read will return that error.

@@ -18,7 +18,6 @@ func TestMultiReader(t *testing.T) {
 		return
 	}
 	reader := MultiReader(r1, file, r2, r3)
-
 	newReader := bufio.NewReader(reader)
 	for {
 		line, isPrefix, err := newReader.ReadLine()
